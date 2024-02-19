@@ -41,6 +41,28 @@ enum token_type {
 	OPERATOR = 8,
 };
 
+enum class expression_node_type {
+	OPERATORATION = 0,
+	LITERAL = 1,
+};
+
+/// <summary>
+/// Defines a part of an expression. Add static called traverse to get calculations.
+/// </summary>
+struct ExpressionNode {
+	std::string value;
+	expression_node_type type;
+	ExpressionNode* left;
+	ExpressionNode* right;
+
+	ExpressionNode(
+		std::string value, 
+		expression_node_type type, 
+		ExpressionNode* left, 
+		ExpressionNode* right
+	);
+};
+
 struct Token {
 	token_type type;
 	std::string value;

@@ -264,3 +264,6 @@ void Lexer::print_tokens()
 		std::cout << i.type << ": " << i.value << " (line " << i.pos.line << ", col " << i.pos.col << ")\n";
 	}
 }
+
+ExpressionNode::ExpressionNode(std::string value, expression_node_type type, ExpressionNode* left, ExpressionNode* right)
+	: value(value), type(type), left(left), right(right) {}
