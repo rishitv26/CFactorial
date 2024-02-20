@@ -19,6 +19,8 @@ const std::string KEYWORDS[] = {
 */
 const std::string COMPOUND_OPERATORS[] = {
 	// for efficiency, add most used keywords on top, and least used on the bottom
+	"->",
+	"<-",
 	"==",
 	"!=",
 	"<=",
@@ -44,23 +46,6 @@ enum token_type {
 enum class expression_node_type {
 	OPERATORATION = 0,
 	LITERAL = 1,
-};
-
-/// <summary>
-/// Defines a part of an expression. Add static called traverse to get calculations.
-/// </summary>
-struct ExpressionNode {
-	std::string value;
-	expression_node_type type;
-	ExpressionNode* left;
-	ExpressionNode* right;
-
-	ExpressionNode(
-		std::string value, 
-		expression_node_type type, 
-		ExpressionNode* left, 
-		ExpressionNode* right
-	);
 };
 
 struct Token {

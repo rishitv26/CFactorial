@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include <iostream>
 #include <sstream>
+#include "errors.h"
 
 /*
 * Symbols that designate something related to math / logic
@@ -65,7 +66,9 @@ void Lexer::tokenize()
 			while (code[++i] != '"') {
 				++pos.col;
 				if (i == code.size() - 2 && next != '"') {
-					// throw an error here.	
+					// throw an error here.
+					ERROR(error_type::INCOMPLETE_STRING, 
+						"string must be complete", pos, file, code);
 				}
 				word += code[i];
 			}
@@ -234,7 +237,6 @@ void Lexer::condense_operations()
 	}
 }
 
-// @TODO:
 void Lexer::condense()
 // condenses the code into more meaningfull tokens for parser to proccess.
 {
@@ -264,6 +266,3 @@ void Lexer::print_tokens()
 		std::cout << i.type << ": " << i.value << " (line " << i.pos.line << ", col " << i.pos.col << ")\n";
 	}
 }
-
-ExpressionNode::ExpressionNode(std::string value, expression_node_type type, ExpressionNode* left, ExpressionNode* right)
-	: value(value), type(type), left(left), right(right) {}

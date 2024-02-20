@@ -2,11 +2,9 @@
 #include <cstdlib>
 #include <vector>
 #include <time.h>
-#include <unordered_set>
-
 using namespace std;
 
-int randNum(int min, int max) {
+inline int randNum(int min, int max) {
 	return rand() % (max - min + 1) + min;
 }
 

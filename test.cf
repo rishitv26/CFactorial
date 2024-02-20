@@ -1,5 +1,14 @@
-Integer i=100;
+import system
+using system.println;
+using system.inputln;
 
-if (i==100){
-print("Hey I am 100");
+/*
+My Main program, says hello sire.
+*/
+void main -> (str[] args) {
+	str name = inputln("> ");
+	println("Hello dude!);
+
+	return exitcode(0);
 }
+
