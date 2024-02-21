@@ -98,7 +98,6 @@ void Lexer::tokenize()
 				}
 				i = n + 1;
 				--pos.col; // accomodate for increment after if statements
-				++pos.line;
 			}
 			else {
 				tokens.push_back(Token(MATH_SYMBOL, std::string(1, current), pos));
