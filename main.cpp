@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include "lexer.h"
+#include "parser.h"
 
 constexpr const char* FILE_NAME = "test.cf";
 
@@ -28,6 +29,8 @@ int main() {
 	lexer.print_tokens();
 
 	// generate syntax trees (parser):
+	Parser parser(tokens, code, FILE_NAME);
+
 	// optimize tree (optimizer):
 	// compile tree (assembler):
 	// output executable:

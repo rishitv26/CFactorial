@@ -251,7 +251,6 @@ void Lexer::condense()
 	label_keywords();
 	// operation condensing:
 	condense_operations();
-	// expression trees generation:
 }
 
 std::vector<Token>* Lexer::return_tokens()

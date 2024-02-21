@@ -8,7 +8,7 @@ My Main program, says hello sire.
 
 void main -> (str[] args) {
 	str name = inputln("> ");
-    println("Hello dude!");
+    println("");
 
 	return exitcode(0);
 }
