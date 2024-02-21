@@ -8,6 +8,7 @@ constexpr const char* FILE_NAME = "test.cf";
 
 std::string code;
 std::vector<Token>* tokens;
+std::vector<SyntaxTree>* syntax_tree;
 
 int main() {
 	// read file:
@@ -28,8 +29,10 @@ int main() {
 	tokens = lexer.return_tokens();
 	lexer.print_tokens();
 
-	// generate syntax trees (parser):
+	// validate generate syntax trees (parser):
 	Parser parser(tokens, code, FILE_NAME);
+	parser.validate();
+	syntax_tree = parser.return_tree();
 
 	// optimize tree (optimizer):
 	// compile tree (assembler):
