@@ -1,10 +1,7 @@
+/*
 import system
 using system.println;
 using system.inputln;
-
-/*
-My Main program, says hello sire.
-*/
 
 void main -> (str[] args) {
 	str name = inputln("> ");
@@ -12,4 +9,6 @@ void main -> (str[] args) {
 
 	return exitcode(0);
 }
-
+*/
+// TESTING EXRESSIONS:
+1, 1, 1, 1, 1

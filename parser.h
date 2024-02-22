@@ -4,9 +4,11 @@
 #include <vector>
 #include <string>
 #include "lexer.h"
+#include <map>
 
 struct SyntaxTreeNode;
 struct SyntaxTree;
+typedef std::map<std::string, std::vector<std::string>> SyntaxGrammerMap;
 
 // defines the type of syntax trees one may have
 // can include expression trees, statement trees, etc.
@@ -26,9 +28,9 @@ struct SyntaxTreeNode {
 // @TODO:
 struct SyntaxTree {
 	syntax_tree_type type;
-	SyntaxTreeNode& father;
+	SyntaxTreeNode* father;
 
-	SyntaxTree(syntax_tree_type& type, SyntaxTreeNode& father);
+	SyntaxTree(syntax_tree_type type, SyntaxTreeNode* father);
 };
 
 class Parser {
@@ -39,11 +41,13 @@ private:
 	std::vector<SyntaxTree> tree;
 
 	void syntactical_analysis();
+	void syntactical_analysis(int t, SyntaxGrammerMap::iterator i);
 	void semantical_analysis();
 public:
 	Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME);
 
 	void validate();
+	void add_trees(std::vector<Token>& t, std::vector<std::string>& matches);
 	std::vector<SyntaxTree>* return_tree();
 };
 
