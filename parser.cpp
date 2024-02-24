@@ -32,7 +32,9 @@ SyntaxTreeNode::SyntaxTreeNode(Token& _token, SyntaxTree* _location, SyntaxTreeN
 std::vector<std::string> Parser::find_pattern(std::vector<Token>& current, int token_index)
 // finds the pattern/patterns of tokens that match.
 {
-	
+	for (Token& i : current) {
+
+	}
 }
 
 void Parser::syntactical_analysis()
