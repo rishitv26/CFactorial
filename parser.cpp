@@ -23,11 +23,17 @@ static SyntaxGrammerMap GRAMMAR = {
 Parser::Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME)
 	: tokens(t), code(_code), FILE_NAME(_FILE_NAME) {}
 
-SyntaxTree::SyntaxTree(syntax_tree_type _type, SyntaxTreeNode* _father)
+SyntaxTree::SyntaxTree(std::string& _type, SyntaxTreeNode* _father)
 	: type(_type), father(_father) {}
 
 SyntaxTreeNode::SyntaxTreeNode(Token& _token, SyntaxTree* _location, SyntaxTreeNode* _next)
 	: token(_token), location(_location), next(_next) {}
+
+std::vector<std::string> Parser::find_pattern(std::vector<Token>& current, int token_index)
+// finds the pattern/patterns of tokens that match.
+{
+	
+}
 
 void Parser::syntactical_analysis()
 // performs syntactical analysis
@@ -44,43 +50,10 @@ void Parser::syntactical_analysis()
 }
 
 void Parser::syntactical_analysis(int t, SyntaxGrammerMap::iterator i)
-// recursive instance:
 {
 	std::vector<Token> current;
 	for (; t < tokens->size(); ++t) {
 		current.push_back(tokens->at(t));
-		// proccess:
-		std::vector<std::string> matches;
-		
-		for (int j = 0; j < current.size(); ++j) {
-			// find match:
-			
-			matches.clear();
-			for (int c = 0; i != GRAMMAR.end(); ++i, c++) {
-				if (i->second[j][0] == '/') {
-					if (
-						(current.back().type == INTEGER ||
-							current.back().type == STRING ||
-							current.back().type == DECIMAL) &&
-						i->second[j] == "/LIT"
-						) {
-						matches.push_back(i->first);
-					}
-					else if (current.back().type == IDENTIFIER && i->second[j] == "/ID") {
-						matches.push_back(i->first);
-					}
-				}
-				else if (current.back().value == i->second[j]) matches.push_back(i->first);
-			}
-			
-		}
-		
-		cout << "Matches: " << matches.size() << ": " << endl;
-		cout << matches.front() << ": ";
-		for (auto& i : GRAMMAR[matches.front()]) {
-			cout << i << " ";
-		}
-		cout << endl;
 	}
 }
 
@@ -99,12 +72,18 @@ void Parser::validate()
 }
 
 //// @TODO:
-void Parser::add_trees(std::vector<Token>& t, std::vector<std::string>& matches)
+void Parser::add_trees(std::vector<Token>& t, std::string& type)
 {
-	/*SyntaxTreeNode father(t[0], &tree[0], nullptr);
-	SyntaxTree first(syntax_tree_type::EXPRESSION, &father);
-	if (GRAMMAR)
-	tree.push_back(first);*/
+	SyntaxTreeNode father(t[0], &tree.back(), nullptr);
+	SyntaxTree new_tree(type, &father);
+	tree.push_back(new_tree);
+	SyntaxTreeNode* prev = &father;
+	for (int i = 1; i < t.size(); ++i) {
+		SyntaxTreeNode next(t[i], &tree.back(), nullptr);
+		prev->next = &next;
+		prev = &next;
+	}
+	father.location = &tree.back();
 }
 
 std::vector<SyntaxTree>* Parser::return_tree() { return &tree; }

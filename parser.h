@@ -10,12 +10,6 @@ struct SyntaxTreeNode;
 struct SyntaxTree;
 typedef std::map<std::string, std::vector<std::string>> SyntaxGrammerMap;
 
-// defines the type of syntax trees one may have
-// can include expression trees, statement trees, etc.
-enum class syntax_tree_type {
-	EXPRESSION = 0,
-};
-
 // @TODO:
 struct SyntaxTreeNode {
 	Token& token;
@@ -27,10 +21,10 @@ struct SyntaxTreeNode {
 
 // @TODO:
 struct SyntaxTree {
-	syntax_tree_type type;
+	std::string& type;
 	SyntaxTreeNode* father;
 
-	SyntaxTree(syntax_tree_type type, SyntaxTreeNode* father);
+	SyntaxTree(std::string& type, SyntaxTreeNode* father);
 };
 
 class Parser {
@@ -39,15 +33,18 @@ private:
 	std::string& code;
 	const char* FILE_NAME;
 	std::vector<SyntaxTree> tree;
+	int pos = 0;
 
 	void syntactical_analysis();
 	void syntactical_analysis(int t, SyntaxGrammerMap::iterator i);
 	void semantical_analysis();
+
+	std::vector<std::string> find_pattern(std::vector<Token>& current, int token_index=0);
 public:
 	Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME);
 
 	void validate();
-	void add_trees(std::vector<Token>& t, std::vector<std::string>& matches);
+	void add_trees(std::vector<Token>& t, std::string& type);
 	std::vector<SyntaxTree>* return_tree();
 };
 
