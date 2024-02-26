@@ -75,4 +75,11 @@ public:
 	void print_tokens();
 };
 
+bool ismathsymbol(char i);
+bool issyntaxsymbol(char i);
+bool isinteger(char i);
+bool iskeyword(std::string i);
+bool iscmpdoperator(char one, char two);
+std::string rmvchrstr(std::string& str, size_t pos);
+
 #endif // LEXER_CF_H

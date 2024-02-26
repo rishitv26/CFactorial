@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "lexer.h"
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -29,25 +30,54 @@ SyntaxTree::SyntaxTree(std::string& _type, SyntaxTreeNode* _father)
 SyntaxTreeNode::SyntaxTreeNode(Token& _token, SyntaxTree* _location, SyntaxTreeNode* _next)
 	: token(_token), location(_location), next(_next) {}
 
+static void insert(std::vector<std::string>& injected, std::vector<std::string>& content, size_t index) {
+	injected.erase(injected.begin() + index);
+	for (size_t i = index; i < content.size() + index; ++i) {
+		injected.insert(injected.begin() + i, content[i - index]);
+	}
+}
+
+static void subsitute(std::vector<std::string>& current) {
+	for (int i = 0; i < current.size(); ++i) {
+		if (current[i][0] == '~') {
+			std::string id = find_match(current[i]);
+			/*for (auto pair = GRAMMAR.begin(); pair != GRAMMAR.end(); ++pair) {
+				if (pair->second[0] == first.value) {
+					id = pair->first;
+					break;
+				}
+			}*/
+			
+			insert(current, GRAMMAR[id], i);
+		}
+	}
+}
+
 std::vector<std::string> Parser::find_pattern(std::vector<Token>& current, int token_index)
 // finds the pattern/patterns of tokens that match.
 {
-	for (Token& i : current) {
+	std::vector<std::string> matches = {};
+	// find initial matches:
+	for (auto pair = GRAMMAR.begin(); pair != GRAMMAR.end(); ++pair) {
+		std::vector<std::string> line = pair->second;
+		for (int i = 0; i < current.size(); ++i) {
 
+		}
 	}
 }
 
 void Parser::syntactical_analysis()
 // performs syntactical analysis
 {
-	// check first node:
-	// track possible patterns and types:
-	// if pattern requires new abstraction / recursion:
-	//		remember old tree
-	//		start new tree (with corresponding type):
-	// when complete with tree, and more trees are in memory:
-	// modify pointers.
-	// throw resonable errors during the proccess.
+	// check each node
+	// add to array of checked nodes
+	// try to find a match of the checked nodes
+	//		if internal recursion has to be checked, substitute rules untill there is no recursion.
+	// add to matches that could work.
+	// if it fully matches, save in a tree.
+	// else keep going
+	// if at any point there are no matches
+	//		throw a syntax error.
 	syntactical_analysis(0, GRAMMAR.begin());
 }
 

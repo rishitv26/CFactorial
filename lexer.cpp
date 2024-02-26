@@ -22,29 +22,29 @@ Token::Token(token_type _type, std::string _value, Position _pos)
 Lexer::Lexer(std::string& _code, const char* _file)
 		: code(_code), file(_file) {}
 
-static bool ismathsymbol(char i) {
+bool ismathsymbol(char i) {
 	const char* ptr = strchr(MATH_SYMBOLS, i);
 	return (ptr == nullptr) ? false : true;
 }
-static bool issyntaxsymbol(char i) {
+bool issyntaxsymbol(char i) {
 	const char* ptr = strchr(SYNTAX_SYMBOLS, i);
 	return (ptr == nullptr) ? false : true;
 }
-static bool isinteger(char i) {
+bool isinteger(char i) {
 	const char* ptr = strchr(DIGIT_SYMBOLS, i);
 	return (ptr == nullptr) ? false : true;
 }
-static bool iskeyword(std::string i) {
+bool iskeyword(std::string i) {
 	for (std::string j : KEYWORDS) if (j == i) return true;
 	return false;
 }
-static bool iscmpdoperator(char one, char two) {
+bool iscmpdoperator(char one, char two) {
 	for (const std::string& i : COMPOUND_OPERATORS) {
 		if (i[0] == one && i[1] == two) return true;
 	}
 	return false;
 }
-static std::string rmvchrstr(std::string& str, size_t pos) {
+std::string rmvchrstr(std::string& str, size_t pos) {
 	str.erase(str.begin() + pos);
 	return str;
 }
