@@ -8,6 +8,7 @@
 
 struct SyntaxTreeNode;
 struct SyntaxTree;
+
 typedef std::map<std::string, std::vector<std::string>> SyntaxGrammerMap;
 
 // @TODO:
@@ -29,6 +30,7 @@ struct SyntaxTree {
 
 class Parser {
 private:
+	std::vector<std::string> matches;
 	std::vector<Token>* tokens;
 	std::string& code;
 	const char* FILE_NAME;
@@ -39,7 +41,8 @@ private:
 	void syntactical_analysis(int t, SyntaxGrammerMap::iterator i);
 	void semantical_analysis();
 
-	std::vector<std::string> find_pattern(std::vector<Token>& current, int token_index=0);
+	int find_pattern(std::vector<Token>& current);
+	bool perfect_match(std::vector<Token>& current);
 public:
 	Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME);
 

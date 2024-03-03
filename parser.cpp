@@ -37,26 +37,23 @@ static void insert(std::vector<std::string>& injected, std::vector<std::string>&
 	}
 }
 
-static void subsitute(std::vector<std::string>& current) {
-	for (int i = 0; i < current.size(); ++i) {
-		if (current[i][0] == '~') {
-			std::string id = find_match(current[i]);
-			/*for (auto pair = GRAMMAR.begin(); pair != GRAMMAR.end(); ++pair) {
-				if (pair->second[0] == first.value) {
-					id = pair->first;
-					break;
-				}
-			}*/
-			
-			insert(current, GRAMMAR[id], i);
+bool Parser::perfect_match(std::vector<Token>& current)
+{
+	if (matches.size() != 1) return false;
+	else {
+		for (Token& i : current) {
+			for (std::string& j : matches) {
+				if (i.value != j) return false;
+			}
 		}
 	}
+	return true;
 }
 
-std::vector<std::string> Parser::find_pattern(std::vector<Token>& current, int token_index)
+//// =================================================================== TODO:
+int Parser::find_pattern(std::vector<Token>& current)
 // finds the pattern/patterns of tokens that match.
 {
-	std::vector<std::string> matches = {};
 	// find initial matches:
 	for (auto pair = GRAMMAR.begin(); pair != GRAMMAR.end(); ++pair) {
 		std::vector<std::string> line = pair->second;
@@ -64,6 +61,7 @@ std::vector<std::string> Parser::find_pattern(std::vector<Token>& current, int t
 
 		}
 	}
+	return 0; // TEMPORARY
 }
 
 void Parser::syntactical_analysis()
@@ -81,11 +79,20 @@ void Parser::syntactical_analysis()
 	syntactical_analysis(0, GRAMMAR.begin());
 }
 
+//// =================================================================== TODO:
 void Parser::syntactical_analysis(int t, SyntaxGrammerMap::iterator i)
 {
 	std::vector<Token> current;
+	int best_match = 0; // make ordered map...
 	for (; t < tokens->size(); ++t) {
 		current.push_back(tokens->at(t));
+		best_match = find_pattern(current);
+		if (best_match == -1) {
+			// return an error here... @TODO
+		}
+		else if (perfect_match(current)) {
+			// add the tree here:
+		}
 	}
 }
 
