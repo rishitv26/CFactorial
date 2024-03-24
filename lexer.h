@@ -42,6 +42,7 @@ enum token_type {
 	IDENTIFIER = 7,
 	OPERATOR = 8,
 	END_OF_FILE = 9,
+	REDUCED = 10,
 };
 
 enum class expression_node_type {
@@ -54,6 +55,7 @@ struct Token {
 	std::string value;
 	Position pos;
 	Token(token_type type, std::string value, Position pos);
+	std::string operator<<(std::ostream&);
 };
 
 class Lexer {

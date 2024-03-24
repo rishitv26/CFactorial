@@ -1,3 +1,4 @@
+/*
 import system
 using system.println;
 using system.inputln;
@@ -8,3 +9,6 @@ void main -> (str[] args) {
 
 	return exitcode(0);
 }
+*/
+
+1 + 1

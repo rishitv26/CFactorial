@@ -4,8 +4,11 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <iostream>
 #include "parser.h"
 #include "lexer.h"
+using std::cout;
+using std::endl;
 
 template <typename K, typename V>
 class OrderedMap
@@ -70,6 +73,7 @@ public:
 	size_t size();
 
 	std::vector<T>& cvect();
+	void print();
 };
 
 template <typename T>
@@ -96,5 +100,15 @@ inline size_t Stack<T>::size() { return cpp_vect.size(); }
 
 template <typename T>
 inline std::vector<T>& Stack<T>::cvect() { return cpp_vect; }
+
+template<typename T>
+inline void Stack<T>::print()
+{
+	cout << "[";
+	for (T& i : cpp_vect) {
+		cout << i.value << ", ";
+	}
+	cout << "\b\b]\n";
+}
 
 #endif // UTILS_CF_H

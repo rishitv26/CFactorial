@@ -19,6 +19,11 @@ constexpr const char* DIGIT_SYMBOLS = "0123456789";
 Token::Token(token_type _type, std::string _value, Position _pos)
 		: type(_type), value(_value), pos(_pos) {}
 
+std::string Token::operator<<(std::ostream&)
+{
+	return value;
+}
+
 Lexer::Lexer(std::string& _code, const char* _file)
 		: code(_code), file(_file) {}
 
