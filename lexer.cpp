@@ -44,7 +44,7 @@ bool iscmpdoperator(char one, char two) {
 	}
 	return false;
 }
-std::string rmvchrstr(std::string& str, size_t pos) {
+static std::string rmvchrstr(std::string& str, size_t pos) {
 	str.erase(str.begin() + pos);
 	return str;
 }
@@ -114,6 +114,7 @@ void Lexer::tokenize()
 		
 		++pos.col;
 	}
+	tokens.push_back(Token(token_type::END_OF_FILE, "[END FILE]", pos));
 }
 
 void Lexer::label_integers()
@@ -251,6 +252,7 @@ void Lexer::condense()
 	label_keywords();
 	// operation condensing:
 	condense_operations();
+	// add a final endfile token:
 }
 
 std::vector<Token>* Lexer::return_tokens()

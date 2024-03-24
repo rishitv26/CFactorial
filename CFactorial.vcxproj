@@ -133,7 +133,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="optimizer.cpp" />
     <ClCompile Include="parser.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="utils.cpp">
+      <DeploymentContent>true</DeploymentContent>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assembler.h" />
@@ -141,7 +143,9 @@
     <ClInclude Include="lexer.h" />
     <ClInclude Include="optimizer.h" />
     <ClInclude Include="parser.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="utils.h">
+      <DeploymentContent>true</DeploymentContent>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.cf" />

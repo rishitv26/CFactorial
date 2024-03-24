@@ -3,7 +3,6 @@
 #include <sstream>
 #include "lexer.h"
 #include "parser.h"
-#include "utils.h"
 
 constexpr const char* FILE_NAME = "test.cf";
 

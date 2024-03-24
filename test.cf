@@ -1,14 +1,10 @@
-/*
 import system
 using system.println;
 using system.inputln;
 
 void main -> (str[] args) {
 	str name = inputln("> ");
-    println("");
+    println(name);
 
 	return exitcode(0);
 }
-*/
-// TESTING EXRESSIONS:
-1, 1, 1, 1, 1;

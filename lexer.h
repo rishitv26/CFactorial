@@ -41,6 +41,7 @@ enum token_type {
 	KEYWORD = 6,
 	IDENTIFIER = 7,
 	OPERATOR = 8,
+	END_OF_FILE = 9,
 };
 
 enum class expression_node_type {
@@ -75,11 +76,10 @@ public:
 	void print_tokens();
 };
 
-bool ismathsymbol(char i);
-bool issyntaxsymbol(char i);
 bool isinteger(char i);
+bool issyntaxsymbol(char i);
+bool ismathsymbol(char i);
 bool iskeyword(std::string i);
 bool iscmpdoperator(char one, char two);
-std::string rmvchrstr(std::string& str, size_t pos);
 
 #endif // LEXER_CF_H
