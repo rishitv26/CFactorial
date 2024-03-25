@@ -14,6 +14,7 @@ const std::string KEYWORDS[] = {
 	"void",
 	"if",
 	"else",
+	"class",
 };
 /*
 * Operations that are combined from multiple combinations
