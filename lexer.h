@@ -10,7 +10,8 @@
 */
 const std::string KEYWORDS[] = {
 	// for efficiency, add most used keywords on top, and least used on the bottom
-	"var",
+	"int",
+	"void",
 	"if",
 	"else",
 };

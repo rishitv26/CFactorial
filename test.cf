@@ -10,5 +10,6 @@ void main -> (str[] args) {
 	return exitcode(0);
 }
 */
-
-1 + 1
+int x = 8;
+int y = 9;
+int main-> (int x);

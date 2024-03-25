@@ -4,11 +4,11 @@
 #include <vector>
 #include <string>
 #include "lexer.h"
-#include <map>
+#include <unordered_map>
 
 struct SyntaxTreeNode;
 struct SyntaxTree;
-typedef std::map<std::string, std::vector<std::string>> SyntaxGrammerMap;
+typedef std::unordered_map<std::string, std::vector<std::string>> SyntaxGrammerMap;
 
 // defines the type of syntax trees one may have
 // can include expression trees, statement trees, etc.

@@ -6,11 +6,22 @@ using std::cout;
 using std::endl;
 
 /*
-* Syntax Patterns. Defines the syntax grammer.
+* Syntax Patterns. Defines the syntax grammer. Patterns that come before take more precedence.
 */
 static SyntaxGrammerMap GRAMMAR = {
+	// variables:
+	{"~decl1", {"/TYPE", "/ID"}},
+	{"~var1", {"~decl", "=", "~expr"}},
+	// functions:
+	{"...1", {"~decl", ",", "~decl"}},
+	{"...2", {"...", ",", "~decl"}},
+	{"~fund1", {"~decl", "->", "(", "...", ")"}},
+	{"~fund2", {"~decl", "->", "(", "~decl", ")"}},
+	{"~fund3", {"~decl", "->", "(", ")"}},
 	// expressions:
 	{"~expr1", {"~term"}},
+	{"~expr5", {"~expr", "/", "~expr"}},
+	{"~expr4", {"~expr", "*", "~expr"}},
 	{"~expr2", {"~expr", "+", "~expr"}},
 	{"~expr3", {"~expr", "-", "~expr"}},
 	// terms:
@@ -20,8 +31,16 @@ static SyntaxGrammerMap GRAMMAR = {
 	// factors:
 	{"~fact1", {"/ID"}},
 	{"~fact2", {"/LIT"}},
-	{"~fact3", {"(", "~expr", ")"}},
-	{"goofy", {","}},
+	{"~fact3", {"(", "~expr", ")"}},	
+};
+std::vector<std::string> GRAMMAR_PRECEDENCE = {
+
+};
+
+// contains all "types" seperate form keywords.
+static const std::vector<std::string> TYPES = {
+	"int",
+	"void"
 };
 
 Parser::Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME)
@@ -43,21 +62,45 @@ static std::string parseToken(Token& i) {
 	else if (i.type == IDENTIFIER) {
 		str = "/ID";
 	}
+	else {
+		for (const std::string& i : TYPES) {
+			if (i == str) {
+				str = "/TYPE";
+				break;
+			}
+		}
+	}
 	return str;
 }
+static int findpattern(std::vector<Token>& vec, std::vector<std::string>& pattern) {
+	int vecSize = vec.size();
+	int patternSize = pattern.size();
 
+	// Iterate through the vector to find the pattern
+	for (int i = 0; i <= vecSize - patternSize; ++i) {
+		bool found = true;
+		// Check if the pattern matches starting from index i
+		for (int j = 0; j < patternSize; ++j) {
+			if (parseToken(vec[i + j]) != pattern[j]) {
+				found = false;
+				break;
+			}
+		}
+		if (found) {
+			return i; 
+		}
+	}
+
+	return -1;
+}
 static bool is_reducable(Stack<Token>& stack)
 // check to see if stack is reducable
 {
 	for (auto pair = GRAMMAR.begin(); pair != GRAMMAR.end(); ++pair) {
-		int offset = 0;
-		bool b = false;
-		// find offset where this rule starts:
-		for (int i = 0; i < stack.cvect().size(); ++i) {
-			if (parseToken(stack.cvect()[i]) == pair->second[0]) { offset = i; break; }
-			if (i == stack.cvect().size() - 1) b = true;
-		} if (b) continue;
-
+		// find offset of the pattern if it exists.
+		int offset = findpattern(stack.cvect(), pair->second);
+		if (offset < 0) continue;
+		
 		// continue from there:
 		for (int i = 0; i < stack.cvect().size(); ++i) {
 			if (i >= pair->second.size() || i + offset >= stack.cvect().size()) break;
@@ -71,14 +114,21 @@ static bool is_reducable(Stack<Token>& stack)
 	return false; // no matches
 }
 
-//// ==================================================================== TODO:
-static void replace(std::vector<Token>& obj, std::vector<std::string>& replace, Token& val) {
-	// find initial index:
-	int index = 0;
-	for (int i = 0; i < obj.size(); ++i) {
-		int temp = 0;
-		for (std::string& j : replace) {
-
+static void replace(std::vector<Token>& arr, std::vector<std::string>& pattern, Token& replacement) {
+	for (size_t i = 0; i < arr.size(); ++i) {
+		if (i + pattern.size() <= arr.size()) {
+			bool match = true;
+			for (size_t j = 0; j < pattern.size(); ++j) {
+				if (parseToken(arr.at(i + j)) != pattern[j]) {
+					match = false;
+					break;
+				}
+			}
+			if (match) {
+				arr.erase(arr.begin() + i, arr.begin() + i + pattern.size());
+				arr.insert(arr.begin() + i, replacement);
+				break;  // Assuming pattern appears only once
+			}
 		}
 	}
 }
@@ -88,13 +138,14 @@ static bool reduce(Stack<Token>& stack)
 {
 	bool tor = false;
 	for (auto pair = GRAMMAR.begin(); pair != GRAMMAR.end(); ++pair) {
-		int offset = 0;
-		bool b = false;
-		// find offset where this rule starts:
-		for (int i = 0; i < stack.cvect().size(); ++i) {
-			if (parseToken(stack.cvect()[i]) == pair->second[0]) { offset = i; break; }
-			if (i == stack.cvect().size() - 1) b = true;
-		} if (b) continue;
+		// find offset of the pattern if it exists.
+		cout << "{";
+		for (std::string& i : pair->second) {
+			cout << i << ", ";
+		}
+		cout << "\b\b}\n";
+		int offset = findpattern(stack.cvect(), pair->second);
+		if (offset < 0) continue;
 
 		// continue from there:
 		for (int i = 0; i < stack.cvect().size(); ++i) {
@@ -107,13 +158,8 @@ static bool reduce(Stack<Token>& stack)
 				// reduction step:
 				std::string s = pair->first;
 				s.erase(s.begin() + s.size() - 1);
-
-				/*for (int j = 0; j < pair->second.size() - 1; ++j) {
-					if (j < 0) break;
-					stack.cvect().erase(stack.cvect().begin() + stack.cvect().size() - i - 1);
-				}
-				stack.cvect()[stack.cvect().size() - i - 1].value = s;
-				stack.cvect()[stack.cvect().size() - i - 1].type = REDUCED;*/
+				Token replacement(REDUCED, s, stack.cvect()[stack.cvect().size() - i - 1].pos);
+				replace(stack.cvect(), pair->second, replacement);
 			}
 		}
 	}
@@ -142,10 +188,11 @@ void Parser::syntactical_analysis()
 void Parser::syntactical_analysis(int t, SyntaxGrammerMap::iterator i)
 {
 	Stack<Token> stack;
-	
+
 	for (Token& token : *tokens) {
 		stack.push(token);
 		stack.print();
+		if (token.value != ";") continue;
 		if (is_reducable(stack)) while (is_reducable(stack)) {
 			cout << "REDUCE!!!" << endl;
 			if (!reduce(stack)) continue;
