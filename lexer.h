@@ -11,10 +11,13 @@
 const std::string KEYWORDS[] = {
 	// for efficiency, add most used keywords on top, and least used on the bottom
 	"int",
+	"str",
 	"void",
 	"if",
 	"else",
 	"class",
+	"return",
+	"import",
 };
 /*
 * Operations that are combined from multiple combinations
@@ -57,6 +60,7 @@ struct Token {
 	std::string value;
 	Position pos;
 	Token(token_type type, std::string value, Position pos);
+	Token() {}
 	std::string operator<<(std::ostream&);
 };
 

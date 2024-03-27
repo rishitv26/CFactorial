@@ -3,13 +3,15 @@
 #include <string>
 
 enum class error_type {
-	INCOMPLETE_STRING = 0,
+	INCOMPLETE_STRING = 897,
+	UNEXPECTED_TOKEN = 389,
 };
 
 struct Position {
 	unsigned int line;
 	unsigned int col;
 	Position(int line, int col);
+	Position() {}
 };
 
 void ERROR(error_type t, 

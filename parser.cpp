@@ -9,12 +9,22 @@ using std::endl;
 * Syntax Patterns. Defines the syntax grammer. Patterns that come before take more precedence.
 */
 static SyntaxGrammerMap GRAMMAR = {
+	// more terms:
+	{"~term1", {"-", "~fact"}},
+	{"~term3", {"~term", "/", "~fact"}},
+	{"~term4", {"~term", "*", "~fact"}},
+	// more expressions:
+	{"~expr2", {"~expr", "+", "~term"}},
+	{"~expr3", {"~expr", "-", "~term"}},
 	// variables:
 	{"~decl1", {"/TYPE", "/ID"}},
 	{"~var1", {"~decl", "=", "~expr"}},
+	// assignment:
+	{"~assign1", {"/ID", "="}},
 	// functions:
 	{"~...1", {"~decl", ",", "~decl"}},
 	{"~...2", {"~...", ",", "~decl"}},
+	{"~...3", {"~...", ",", "~..."}},
 	{"~fund1", {"~decl", "->", "(", "~...", ")"}},
 	{"~fund2", {"~decl", "->", "(", "~decl", ")"}},
 	{"~fund3", {"~decl", "->", "(", ")"}},
@@ -24,25 +34,31 @@ static SyntaxGrammerMap GRAMMAR = {
 	{"~funcal2", {"~funstart", "~expr", ")"}},
 	{"~funcal3", {"~funstart", ")"}},
 	// factors:
-	{"~fact1", {"/ID"}},
-	{"~fact2", {"/LIT"}},
-	{"~fact3", {"(", "~expr", ")"}},
-	{"~fact4", {"~funcal"}},
+	{"~fact1", {"-", "-", "/ID"}},
+	{"~fact2", {"+", "+", "/ID"}},
+	{"~fact3", {"/ID", "-", "-"}},
+	{"~fact4", {"/ID", "+", "+"}},
+	{"~fact5", {"/ID"}},
+	{"~fact6", {"/LIT"}},
+	{"~fact7", {"(", "~expr", ")"}},
+	{"~fact8", {"~funcal"}},
 	// terms:
-	{"~term1", {"~fact"}},
-	{"~term2", {"~term", "/", "~fact"}},
-	{"~term3", {"~term", "*", "~fact"}},
+	{"~term2", {"~fact"}},
 	// expressions:
 	{"~expr1", {"~term"}},
-	{"~expr2", {"~expr", "+", "~expr"}},
-	{"~expr3", {"~expr", "-", "~expr"}},
 	{"~eee1", {"~expr", ",", "~expr"}},
 	{"~eee2", {"~eee", ",", "~expr"}},
+	{"~eee3", {"~eee", ",", "~eee"}},
 	// statements:
 	{"~state1", {"~var", ";"}},
-	{"~state2", {"~expr", ";"}},
+	{"~state2", {"~assign", "~expr", ";"}},
+	{"~state3", {"~decl", ";"}},
+	{"~state4", {"return", "~expr", ";"}},
+	{"~state5", {"~expr", ";"}},
+	{"~state6", {"~scope"}},
 	{"~sss1", {"~state", "~state"}},
 	{"~sss2", {"~sss", "~state"}},
+	{"~sss3", {"~sss", "~sss"}},
 	// scopes:
 	{"~scope1", {"{", "~sss", "}"}},
 	{"~scope2", {"{", "~state", "}"}},
@@ -51,11 +67,18 @@ static SyntaxGrammerMap GRAMMAR = {
 /*
 * Precendent for each rule in GRAMMAR. Patterns that come before take more precedence.
 */
-std::vector<std::string> GRAMMAR_PRECEDENCE = {
+const std::string GRAMMAR_PRECEDENCE[] = {
+	"~term1",
+	"~term3",
+	"~term4",
+	"~expr2",
+	"~expr3",
 	"~decl1",
 	"~var1",
+	"~assign1",
 	"~...1",
 	"~...2",
+	"~...3",
 	"~fund1",
 	"~fund3",
 	"~fund2",
@@ -68,16 +91,24 @@ std::vector<std::string> GRAMMAR_PRECEDENCE = {
 	"~fact2",
 	"~fact3",
 	"~fact4",
-	"~term1",
+	"~fact5",
+	"~fact6",
+	"~fact7",
+	"~fact8",
 	"~term2",
-	"~term3",
 	"~expr1",
-	"~expr2",
-	"~expr3",
+	"~eee1",
+	"~eee2",
+	"~eee3",
 	"~state1",
 	"~state2",
+	"~state3",
+	"~state4",
+	"~state5",
+	"~state6",
 	"~sss1",
 	"~sss2",
+	"~sss3",
 	"~scope1",
 	"~scope2",
 	"~scope3",
@@ -86,12 +117,49 @@ std::vector<std::string> GRAMMAR_PRECEDENCE = {
 // contains all "types" seperate form keywords.
 static const std::vector<std::string> TYPES = {
 	"int",
+	"str",
 	"void",
 	"class",
 };
 
 Parser::Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME)
 	: tokens(t), code(_code), FILE_NAME(_FILE_NAME) {}
+
+std::vector<SyntaxTreeNode>& Parser::return_current_layer()
+{
+	return current_layer;
+}
+
+void Parser::set_father(SyntaxTreeNode& f)
+{
+	father = f;
+}
+
+SyntaxTreeNode& Parser::get_syntax_tree()
+{
+	return father;
+}
+
+SyntaxTreeNode::SyntaxTreeNode(Token& n, std::vector<SyntaxTreeNode>& c, SyntaxTreeNode* f)
+	: name(n), children(c), father(f) {}
+
+void SyntaxTreeNode::print()
+{
+	for (int i = 0; i < children.size(); ++i) cout << '-';
+	cout << ' ' << name.value << ": " << children.size() << endl;
+	if (children.size() == 0) return;
+	for (SyntaxTreeNode& i : children) {
+		i.print();
+	}
+}
+
+Token& SyntaxTreeNode::get_closest_token()
+{
+	if (children.size() == 0) return name;
+	else {
+		return children.front().get_closest_token();
+	}
+}
 
 static std::string parseToken(Token& i) {
 	std::string str = i.value;
@@ -113,6 +181,7 @@ static std::string parseToken(Token& i) {
 	}
 	return str;
 }
+
 static int findpattern(std::vector<Token>& vec, std::vector<std::string>& pattern) {
 	int vecSize = (int)vec.size();
 	int patternSize = (int)pattern.size();
@@ -154,7 +223,7 @@ static bool is_reducable(Stack<Token>& stack)
 	
 	return false; // no matches
 }
-static void replace(std::vector<Token>& arr, std::vector<std::string>& pattern, Token& replacement) {
+static void replace(std::vector<Token>& arr, std::vector<std::string>& pattern, Token& replacement, Parser& parser) {
 	for (size_t i = 0; i < arr.size(); ++i) {
 		if (i + pattern.size() <= arr.size()) {
 			bool match = true;
@@ -165,14 +234,29 @@ static void replace(std::vector<Token>& arr, std::vector<std::string>& pattern, 
 				}
 			}
 			if (match) {
-				arr.erase(arr.begin() + i, arr.begin() + i + pattern.size());
-				arr.insert(arr.begin() + i, replacement);
-				break;  // Assuming pattern appears only once
+				const size_t start = i;
+				const size_t end = i + pattern.size();
+				auto& current_layer = parser.return_current_layer();
+
+				// create new syntax tree with the child nodes:
+				SyntaxTreeNode s;
+				s.name = replacement;
+				for (size_t j = start; j < end; ++j) {
+					s.children.push_back(current_layer.at(j));
+					s.children.back().father = &s;
+				}
+				// copy paste children:
+				current_layer.erase(current_layer.begin() + start, current_layer.begin() + end);
+				current_layer.insert(current_layer.begin() + start, s);
+
+				arr.erase(arr.begin() + start, arr.begin() + end);
+				arr.insert(arr.begin() + start, replacement);
+				break;  // pattern appears only once
 			}
 		}
 	}
 }
-static bool reduce(Stack<Token>& stack, Parser& s) 
+static bool reduce(Stack<Token>& stack, Parser& parse) 
 // reduce the stack if stack is reducable
 {
 	for (const std::string& first : GRAMMAR_PRECEDENCE) {
@@ -191,7 +275,7 @@ static bool reduce(Stack<Token>& stack, Parser& s)
 				std::string s = first;
 				s.erase(s.begin() + s.size() - 1);
 				Token replacement(REDUCED, s, stack.cvect()[stack.cvect().size() - i - 1].pos);
-				replace(stack.cvect(), GRAMMAR[first], replacement);
+				replace(stack.cvect(), GRAMMAR[first], replacement, parse);
 				stack.print();
 				return true; // ONLY DO 1 SIMPLIFICATION AT A TIME!
 			}
@@ -200,6 +284,7 @@ static bool reduce(Stack<Token>& stack, Parser& s)
 	stack.print();
 	return false;
 }
+
 static void check_errors(Stack<Token>& stack, Parser& s) {// change this in the future to make more effiecient
 	for (Token& i : stack.cvect()) {
 		if (i.type == END_OF_FILE) break;
@@ -208,8 +293,8 @@ static void check_errors(Stack<Token>& stack, Parser& s) {// change this in the 
 		}
 	}
 }
-static void final_check(Stack<Token>& stack, Parser& s) {
-	check_errors(stack, s);
+static void final_check(Stack<Token>& stack, Parser& parser) {
+	check_errors(stack, parser);
 	// check for unequal amount of { or [ or < or (
 	size_t curly = 0;
 	size_t sqrbrack = 0;
@@ -218,29 +303,57 @@ static void final_check(Stack<Token>& stack, Parser& s) {
 	for (Token& i : stack.cvect()) {
 		if (i.value == "{") curly++;
 		else if (i.value == "}") curly--;
-		if (curly < 0) s.throw_error(i);
+		if (curly < 0) parser.throw_error(i);
 
 		if (i.value == "[") sqrbrack++;
 		else if (i.value == "]") sqrbrack--;
-		if (sqrbrack < 0) s.throw_error(i);
+		if (sqrbrack < 0) parser.throw_error(i);
 
 		if (i.value == "<") angbrack++;
 		else if (i.value == ">") angbrack--;
-		if (angbrack < 0) s.throw_error(i);
+		if (angbrack < 0) parser.throw_error(i);
 
 		if (i.value == "(") paranth++;
 		else if (i.value == ")") paranth--;
-		if (paranth < 0) s.throw_error(i);
+		if (paranth < 0) parser.throw_error(i);
 	}
+	// finish up tree:
+	auto& current_layer = parser.return_current_layer();
+	size_t start = 0;
+	size_t end = current_layer.size();
+
+	SyntaxTreeNode s;
+	s.name = Token(REDUCED, "~prog", Position(0, 0));
+	for (size_t j = start; j < end; ++j) {
+		if (
+			current_layer.at(j).name.value == "~sss" ||
+			current_layer.at(j).name.value == "~state" ||
+			current_layer.at(j).name.value == "~fundef" ||
+			current_layer.at(j).name.type == END_OF_FILE
+			) {
+			s.children.push_back(current_layer.at(j));
+			s.children.back().father = &s;
+		}
+		else {
+			// throw error here.
+			// blame first token with no children.
+			parser.throw_error(current_layer.at(j).get_closest_token());
+		}
+	}
+	parser.set_father(s);
+
+	// ============================ TODO: more final checks
 }
 
 void Parser::throw_error(Token& i)
 {
-	cout << "this made negative sense..." << endl;
+	/*cout << "this made negative sense..." << endl;
 	cout << "this token tripped me: [";
 	cout << i.value << ", " << i.type << ", (line: " << i.pos.line << ", col: " << i.pos.col;
 	cout << ")]\n";
-	exit(1);
+	exit(1);*/
+	const std::string message = "Token \"" + i.value + "\" was not expected.";
+	ERROR(error_type::UNEXPECTED_TOKEN, message.c_str(), i.pos, FILE_NAME, code);
 }
 
 void Parser::syntactical_analysis()
@@ -249,6 +362,9 @@ void Parser::syntactical_analysis()
 	Stack<Token> stack;
 	for (Token& token : *tokens) {
 		stack.push(token);
+		SyntaxTreeNode s;
+		s.name = token;
+		current_layer.push_back(s);
 		stack.print();
 		if (token.value != ";") continue;
 		if (is_reducable(stack)) do {
@@ -273,13 +389,4 @@ void Parser::validate()
 {
 	syntactical_analysis();
 	semantical_analysis();
-}
-
-//// @TODO:
-void Parser::add_trees(std::vector<Token>& t, std::vector<std::string>& matches)
-{
-	/*SyntaxTreeNode father(t[0], &tree[0], nullptr);
-	SyntaxTree first(syntax_tree_type::EXPRESSION, &father);
-	if (GRAMMAR)
-	tree.push_back(first);*/
 }

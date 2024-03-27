@@ -1,13 +1,8 @@
-/*
-import system
-using system.println;
-using system.inputln;
 
-void main -> (str[] args) {
+
+void main -> () {
 	str name = inputln("> ");
     println(name);
 
 	return exitcode(0);
 }
-*/
-int var = 1;

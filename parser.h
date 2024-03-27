@@ -6,8 +6,6 @@
 #include "lexer.h"
 #include <unordered_map>
 
-struct SyntaxTreeNode;
-struct SyntaxTree;
 typedef std::unordered_map<std::string, std::vector<std::string>> SyntaxGrammerMap;
 
 // defines the type of syntax trees one may have
@@ -16,9 +14,23 @@ enum class syntax_tree_type {
 	EXPRESSION = 0,
 };
 
+struct SyntaxTreeNode {
+	Token name;
+	std::vector<SyntaxTreeNode> children;
+	SyntaxTreeNode* father = nullptr;
+
+	SyntaxTreeNode() {}
+	SyntaxTreeNode(Token& n, std::vector<SyntaxTreeNode>& c, SyntaxTreeNode* f);
+
+	void print();
+	Token& get_closest_token();
+};
+
 class Parser {
 private:
 	std::vector<Token>* tokens;
+	SyntaxTreeNode father;
+	std::vector<SyntaxTreeNode> current_layer;
 	std::string& code;
 	const char* FILE_NAME;
 
@@ -28,9 +40,11 @@ private:
 public:
 	void throw_error(Token& t);
 	Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME);
+	std::vector< SyntaxTreeNode>& return_current_layer();
+	void set_father(SyntaxTreeNode& f);
+	SyntaxTreeNode& get_syntax_tree();
 
 	void validate();
-	void add_trees(std::vector<Token>& t, std::vector<std::string>& matches);
 };
 
 
