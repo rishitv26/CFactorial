@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 #include "lexer.h"
-#include <unordered_map>
+#include <map>
 
-typedef std::unordered_map<std::string, std::vector<std::string>> SyntaxGrammerMap;
+typedef std::map<std::string, std::vector<std::string>> SyntaxGrammerMap;
 
 // defines the type of syntax trees one may have
 // can include expression trees, statement trees, etc.

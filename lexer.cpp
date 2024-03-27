@@ -6,7 +6,7 @@
 /*
 * Symbols that designate something related to math / logic
 */
-constexpr const char* MATH_SYMBOLS = "0123456789%+-*/^=!><@$#&|";
+constexpr const char* MATH_SYMBOLS = "0123456789%+-*/^=!><@$#&|~";
 /*
 * Symbols that designate punctuation in the syntax
 */

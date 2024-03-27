@@ -18,6 +18,17 @@ const std::string KEYWORDS[] = {
 	"class",
 	"return",
 	"import",
+	"using",
+	"while",
+	"for",
+	"do",
+	"private",
+	"public",
+	"protected",
+	"const",
+	"inline",
+	"infile",
+	"static",
 };
 /*
 * Operations that are combined from multiple combinations
@@ -32,6 +43,10 @@ const std::string COMPOUND_OPERATORS[] = {
 	">=",
 	">>",
 	"<<",
+	"+=",
+	"-=",
+	"&&",
+	"||",
 };
 
 enum token_type {

@@ -1,8 +1,13 @@
 
+import system
 
-void main -> () {
-	str name = inputln("> ");
-    println(name);
+using system.println;
+using system.inputln;
 
-	return exitcode(0);
+public static void main -> () {
+	str	name = inputln("> ");
+	println(name);
+	
+	return 0;
 }
+
