@@ -3,10 +3,28 @@
 
 #include <vector>
 #include <string>
-#include "lexer.h"
+#include <functional>
 #include <map>
+#include "lexer.h"
 
 typedef std::map<std::string, std::vector<std::string>> SyntaxGrammerMap;
+typedef std::map<std::string, std::vector<std::string>> SemanticChecksMap;
+
+// semantical checks map.
+// contains all semantical checks to be performed on each type of reduced token.
+static SemanticChecksMap checks = {
+	{"~import", {"valid_file"}},
+	{"~using", {"valid_id", "is_defined", "no_rep"}},
+	{"~term", {"valid_math", "type_mismatch", "is_defined"}},
+	{"~expr", {"valid_math", "type_mismatch", "is_defined"}},
+	{"~decl", {"type_mismatch", "no_rep", "is_defined", "reserved_name"}},
+	{"~speddecl", {"context_not_oop", "reserved_name", "correct_decl_type"}},
+	{"~var", {"type_mismatch", "no_rep", "is_defined", "reserved_name"}},
+	{"~class", {"type_mismatch", "no_rep", "reserved_name"}},
+	{"~assign", {"is_defined", "const_violation", "reserved_name"}},
+	{"~fund", {"is_defined", "no_rep", "reserved_name"}},
+	// todo...
+};
 
 // defines the type of syntax trees one may have
 // can include expression trees, statement trees, etc.
@@ -24,6 +42,8 @@ struct SyntaxTreeNode {
 
 	void print();
 	Token& get_closest_token();
+
+	void traverse_left_right(std::function<void(SyntaxTreeNode&)> f);
 };
 
 class Parser {
@@ -40,6 +60,7 @@ private:
 public:
 	void throw_error(Token& t);
 	Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME);
+
 	std::vector< SyntaxTreeNode>& return_current_layer();
 	void set_father(SyntaxTreeNode& f);
 	SyntaxTreeNode& get_syntax_tree();

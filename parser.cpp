@@ -78,6 +78,10 @@ static SyntaxGrammerMap GRAMMAR = {
 	{"~fact6", {"/LIT"}},
 	{"~fact7", {"(", "~expr", ")"}},
 	{"~fact8", {"~funcal"}},
+	{"~fact9", {"true"}},
+	{"~factA", {"false"}},
+	{"~factB", {"(", "/TYPE", ")", "~fact"}},
+	{"~factC", {"~fact"}},
 	// terms:
 	{"~term2", {"~fact"}},
 	// expressions:
@@ -192,6 +196,8 @@ const std::string GRAMMAR_PRECEDENCE[] = {
 	"~fact6",
 	"~fact7",
 	"~fact8",
+	"~fact9",
+	"~factA",
 	"~term2",
 	"~expr1",
 	"~expr9",
@@ -286,6 +292,17 @@ Token& SyntaxTreeNode::get_closest_token()
 	if (children.size() == 0) return name;
 	else {
 		return children.front().get_closest_token();
+	}
+}
+
+void SyntaxTreeNode::traverse_left_right(std::function<void(SyntaxTreeNode&)> f)
+{
+	if (children.size() == 0) return;
+	else {
+		for (SyntaxTreeNode& i : children) {
+			if (i.children.size() != 0) i.traverse_left_right(f);
+			f(i);
+		}
 	}
 }
 
@@ -510,7 +527,19 @@ void Parser::syntactical_analysis()
 void Parser::semantical_analysis()
 // performes semantical analysis
 {
-
+	father.traverse_left_right([](SyntaxTreeNode& x) {
+		// TODO:
+	});
+	// check undeclared variables:
+	// multiple declarations in the same scope:
+	// misuse of reserved identifiers:
+	// attempting to access variable out of scope:
+	// type mismatches:
+	// parameter type mismatch when calling functions:
+	// function return value match the return type:
+	// arithemetic operators operate on numeric types or have defined behaviour:
+	// condition of if statement resolves to true or false only:
+	// exit condition of a loop resolves to true or false only:
 }
 
 void Parser::validate()

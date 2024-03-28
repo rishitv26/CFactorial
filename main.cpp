@@ -27,7 +27,6 @@ int main() {
 	lexer.tokenize();
 	lexer.condense();
 	tokens = lexer.return_tokens();
-	lexer.print_tokens();
 
 	// validate & generate syntax trees (parser):
 	Parser parser(tokens, code, FILE_NAME);

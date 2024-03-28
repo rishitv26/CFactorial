@@ -1,13 +1,3 @@
 
-import system
-
-using system.println;
-using system.inputln;
-
-public static void main -> () {
-	str	name = inputln("> ");
-	println(name);
-	
-	return 0;
-}
+int x = 5;
 
