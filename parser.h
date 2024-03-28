@@ -13,23 +13,25 @@ typedef std::map<std::string, std::vector<std::string>> SemanticChecksMap;
 // semantical checks map.
 // contains all semantical checks to be performed on each type of reduced token.
 static SemanticChecksMap checks = {
-	{"~import", {"valid_file"}},
-	{"~using", {"valid_id", "is_defined", "no_rep"}},
+	{"~import", {"valid_file", "in_global_scope", "add_to_symbols"}},
+	{"~using", {"is_defined", "no_rep", "add_to_symbols"}},
 	{"~term", {"valid_math", "type_mismatch", "is_defined"}},
 	{"~expr", {"valid_math", "type_mismatch", "is_defined"}},
-	{"~decl", {"type_mismatch", "no_rep", "is_defined", "reserved_name"}},
+	{"~decl", {"type_mismatch", "no_rep", "is_defined", "reserved_name", "add_to_symbols"}},
 	{"~speddecl", {"context_not_oop", "reserved_name", "correct_decl_type"}},
 	{"~var", {"type_mismatch", "no_rep", "is_defined", "reserved_name"}},
 	{"~class", {"type_mismatch", "no_rep", "reserved_name"}},
 	{"~assign", {"is_defined", "const_violation", "reserved_name"}},
-	{"~fund", {"is_defined", "no_rep", "reserved_name"}},
-	// todo...
-};
-
-// defines the type of syntax trees one may have
-// can include expression trees, statement trees, etc.
-enum class syntax_tree_type {
-	EXPRESSION = 0,
+	{"~fund", {"no_rep", "reserved_name"}},
+	{"~funstart", {"is_defined", "reserved_name"}},
+	{"~funcal", {"type_mismatch", "correct_params"}},
+	{"~fact", {"type_mismatch", "const_violation", "is_defined"}},
+	{"~ifhead", {"expr_not_bool"}},
+	{"~elstart", {"not_bool_context"}},
+	{"~whilestart", {"expr_not_bool"}},
+	{"~forheads2", {"expr_not_bool"}},
+	{"~state", {"type_mismatch", "not_function_context"}},
+	{"~scope", {"inc_scope"}},
 };
 
 struct SyntaxTreeNode {
@@ -42,6 +44,7 @@ struct SyntaxTreeNode {
 
 	void print();
 	Token& get_closest_token();
+	Token& get_farthest_token();
 
 	void traverse_left_right(std::function<void(SyntaxTreeNode&)> f);
 };

@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "utils.h"
 #include "lexer.h"
+#include "semantics.h"
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -15,6 +16,9 @@ static SyntaxGrammerMap GRAMMAR = {
 	// import and using statements:
 	{"~import1", {"import", "/ID"}},
 	{"~using1", {"using", "/ID"}},
+	// more factors:
+	{"~factB", {"(", "/TYPE", ")", "~fact"}},
+	{"~factC", {"(", "/ID", ")", "~fact"}},
 	// more terms:
 	{"~term1", {"-", "~fact"}},
 	{"~term3", {"&", "~fact"}},
@@ -46,6 +50,9 @@ static SyntaxGrammerMap GRAMMAR = {
 	{"~speddecl9", {"protected", "static", "~decl"}},
 	// more variables:
 	{"~decl4", {"~speddecl"}},
+	{"~decl5", {"~decl", "[", "]"}},
+	{"~decl6", {"/TYPE", "#", "/ID"}},
+	{"~decl7", {"/ID", "#", "/ID"}},
 	{"~var1", {"~decl", "=", "~expr"}},
 	// class:
 	{"~class1", {"~decl", "~scope"}},
@@ -80,8 +87,6 @@ static SyntaxGrammerMap GRAMMAR = {
 	{"~fact8", {"~funcal"}},
 	{"~fact9", {"true"}},
 	{"~factA", {"false"}},
-	{"~factB", {"(", "/TYPE", ")", "~fact"}},
-	{"~factC", {"~fact"}},
 	// terms:
 	{"~term2", {"~fact"}},
 	// expressions:
@@ -145,6 +150,8 @@ const std::string GRAMMAR_PRECEDENCE[] = {
 	"/ID2",
 	"~import1",
 	"~using1",
+	"~factB",
+	"~factC",
 	"~term1",
 	"~term3",
 	"~term4",
@@ -171,6 +178,9 @@ const std::string GRAMMAR_PRECEDENCE[] = {
 	"~speddecl8",
 	"~speddecl9",
 	"~decl4",
+	"~decl5",
+	"~decl6",
+	"~decl7",
 	"~var1",
 	"~class1",
 	"~assign1",
@@ -292,6 +302,14 @@ Token& SyntaxTreeNode::get_closest_token()
 	if (children.size() == 0) return name;
 	else {
 		return children.front().get_closest_token();
+	}
+}
+
+Token& SyntaxTreeNode::get_farthest_token()
+{
+	if (children.size() == 0) return name;
+	else {
+		return children.back().get_closest_token();
 	}
 }
 
@@ -524,11 +542,26 @@ void Parser::syntactical_analysis()
 	stack.print();
 }
 
+Stack<int> scopes;
+static void assign_scopes(SyntaxTreeNode& x) {
+	if (x.name.value == "{" || x.name.value == "for") scopes.push(scopes.access() + 1);
+	else if (x.name.value == "}") scopes.pull();
+	x.name.scope = scopes.access();
+}
+
 void Parser::semantical_analysis()
 // performes semantical analysis
 {
+	scopes.push(0);
+	init(FILE_NAME, code);
+	// assign scopes:
+	father.traverse_left_right(&assign_scopes);
+	// do semantical checks:
 	father.traverse_left_right([](SyntaxTreeNode& x) {
-		// TODO:
+		if (x.name.type != REDUCED) return;
+		for (const std::string& i : checks[x.name.value]) {
+			semantic_checks.at(i)(x);
+		}
 	});
 	// check undeclared variables:
 	// multiple declarations in the same scope:

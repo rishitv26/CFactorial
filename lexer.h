@@ -16,6 +16,8 @@ const std::string KEYWORDS[] = {
 	"if",
 	"else",
 	"class",
+	"true",
+	"false",
 	"return",
 	"import",
 	"using",
@@ -74,9 +76,11 @@ struct Token {
 	token_type type;
 	std::string value;
 	Position pos;
+	int scope;
 	Token(token_type type, std::string value, Position pos);
 	Token() {}
 	std::string operator<<(std::ostream&);
+	bool operator==(Token t);
 };
 
 class Lexer {

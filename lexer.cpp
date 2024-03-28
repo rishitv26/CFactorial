@@ -24,6 +24,11 @@ std::string Token::operator<<(std::ostream&)
 	return value;
 }
 
+bool Token::operator==(Token t)
+{
+	return t.value == value;
+}
+
 Lexer::Lexer(std::string& _code, const char* _file)
 		: code(_code), file(_file) {}
 

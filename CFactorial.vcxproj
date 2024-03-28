@@ -133,6 +133,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="optimizer.cpp" />
     <ClCompile Include="parser.cpp" />
+    <ClCompile Include="semantics.cpp" />
     <ClCompile Include="utils.cpp">
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
@@ -143,6 +144,7 @@
     <ClInclude Include="lexer.h" />
     <ClInclude Include="optimizer.h" />
     <ClInclude Include="parser.h" />
+    <ClInclude Include="semantics.h" />
     <ClInclude Include="utils.h">
       <DeploymentContent>true</DeploymentContent>
     </ClInclude>
