@@ -12,29 +12,31 @@ typedef std::map<std::string, std::vector<std::string>> SemanticChecksMap;
 
 // semantical checks map.
 // contains all semantical checks to be performed on each type of reduced token.
+// TODO: add appropriae check for each keyword.
 static SemanticChecksMap checks = {
-	{"~import", {"valid_file", "in_global_scope", "add_to_symbols"}},
-	{"~using", {"is_defined", "no_rep", "add_to_symbols"}},
-	{"~term", {"valid_math", "type_mismatch", "is_defined"}},
-	{"~expr", {"valid_math", "type_mismatch", "is_defined"}},
-	{"~decl", {"type_mismatch", "no_rep", "is_defined", "reserved_name", "add_to_symbols"}},
-	{"~speddecl", {"context_not_oop", "reserved_name", "correct_decl_type"}},
-	{"~var", {"type_mismatch", "no_rep", "is_defined", "reserved_name"}},
-	{"~class", {"type_mismatch", "no_rep", "reserved_name"}},
-	{"~assign", {"is_defined", "const_violation", "reserved_name"}},
-	{"~fund", {"no_rep", "reserved_name"}},
-	{"~funstart", {"is_defined", "reserved_name"}},
-	{"~funcal", {"type_mismatch", "correct_params"}},
-	{"~fact", {"type_mismatch", "const_violation", "is_defined"}},
-	{"~ifhead", {"expr_not_bool"}},
-	{"~elstart", {"not_bool_context"}},
-	{"~whilestart", {"expr_not_bool"}},
-	{"~forheads2", {"expr_not_bool"}},
-	{"~state", {"type_mismatch", "not_function_context"}},
-	{"~scope", {"inc_scope"}},
+	{"~import", {}},
+	{"~using", {}},
+	{"~term", {}},
+	{"~expr", {}},
+	{"~decl", {}},
+	{"~speddecl", {}},
+	{"~var", {}},
+	{"~class", {}},
+	{"~assign", {}},
+	{"~fund", {}},
+	{"~funstart", {}},
+	{"~funcal", {}},
+	{"~fact", {}},
+	{"~ifhead", {}},
+	{"~elstart", {}},
+	{"~whilestart", {}},
+	{"~forheads2", {}},
+	{"~state", {}},
+	{"~scope", {}},
 };
 
-struct SyntaxTreeNode {
+class SyntaxTreeNode {
+public:
 	Token name;
 	std::vector<SyntaxTreeNode> children;
 	SyntaxTreeNode* father = nullptr;
@@ -47,6 +49,7 @@ struct SyntaxTreeNode {
 	Token& get_farthest_token();
 
 	void traverse_left_right(std::function<void(SyntaxTreeNode&)> f);
+	bool contains_token(Token& i);
 };
 
 class Parser {
@@ -56,11 +59,11 @@ private:
 	std::vector<SyntaxTreeNode> current_layer;
 	std::string& code;
 	const char* FILE_NAME;
-
-	void syntactical_analysis();
-	void semantical_analysis();
 	
 public:
+	void syntactical_analysis();
+	void semantical_analysis();
+
 	void throw_error(Token& t);
 	Parser(std::vector<Token>* t, std::string& _code, const char* _FILE_NAME);
 
@@ -68,7 +71,7 @@ public:
 	void set_father(SyntaxTreeNode& f);
 	SyntaxTreeNode& get_syntax_tree();
 
-	void validate();
+	void condense_imports();
 };
 
 

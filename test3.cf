@@ -1,0 +1,5 @@
+
+void please_work -> (int param1) {
+	printf("ching chong malai chong");
+}
+

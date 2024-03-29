@@ -24,14 +24,14 @@ void ERROR(error_type t,
 	const char* FILE,
 	std::string& code
 ) {
-//#if (defined (_WIN32) || defined (_WIN64))
-//	system("cls");
-//#else
-//	system("clear");
-//#endif
+#if (defined (_WIN32) || defined (_WIN64))
+	system("cls");
+#else
+	system("clear");
+#endif
 	cout << "Compile Error: CE" << (int)t << endl;
 	cout << ">>>> at line " << pos.line << ", column " << pos.col <<
-		" of file \"" << FILE << "\": " << endl;
+		" of file \"" << pos.file << "\": " << endl;
 
 	std::string code_line = splitcode(code)[pos.line-1];
 	cout << "\t " << pos.line << " | " << code_line << endl;

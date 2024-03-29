@@ -65,6 +65,7 @@ void Lexer::tokenize()
 {
 	std::string word = "";
 	Position pos(1, 1);
+	pos.file = file;
 	for (int i = 0; i < code.size(); ++i) {
 		char current = code[i];
 		char next = (i == code.size()-1) ? '\0' : code[i + 1];

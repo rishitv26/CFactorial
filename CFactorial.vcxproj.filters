@@ -65,5 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="test.cf" />
+    <None Include="test3.cf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="test2.cf" />
   </ItemGroup>
 </Project>

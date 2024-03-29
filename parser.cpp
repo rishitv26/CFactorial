@@ -3,6 +3,8 @@
 #include "lexer.h"
 #include "semantics.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 using std::cout;
 using std::endl;
 
@@ -284,6 +286,58 @@ SyntaxTreeNode& Parser::get_syntax_tree()
 	return father;
 }
 
+extern std::string code;
+
+static void _condense_imports(SyntaxTreeNode& x) {
+	if (x.name.value != "~import") return;
+	const std::string& raw_filename = x.children.back().get_closest_token().value;
+	const std::string filename_string = raw_filename + ".cf";
+	const char* filename = filename_string.c_str();
+
+	std::ifstream file(filename);
+	if (!file.is_open()) {
+		const std::string message = "File \"" + filename_string + "\" not found.";
+		ERROR(error_type::IMPORTED_FILE_NOT_FOUND, message.c_str(), x.children.back().get_closest_token().pos, filename, code);
+	}
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string insert_code = buffer.str();
+	file.close();
+
+	Lexer lexer(insert_code, filename);
+	lexer.tokenize();
+	lexer.condense();
+	std::vector<Token>* tokens = lexer.return_tokens();
+
+	Parser parser(tokens, insert_code, filename);
+	parser.syntactical_analysis();
+	// condense all import and using statements:
+	parser.condense_imports();
+	SyntaxTreeNode tree = parser.get_syntax_tree();
+	// proccess tree further:
+	SyntaxTreeNode father; father.name = Token(REDUCED, "~class", Position(0, 0));
+	SyntaxTreeNode file_class; file_class.name = Token(REDUCED, "~decl", Position(0, 0));
+	SyntaxTreeNode class1; class1.name = Token(KEYWORD, "class", Position(0, 0));
+	SyntaxTreeNode class2; class2.name = Token(KEYWORD, raw_filename, Position(0, 0));
+	SyntaxTreeNode scope; scope.name = Token(REDUCED, "~scope", Position(0, 0));
+	SyntaxTreeNode open_curly; open_curly.name = Token(OPERATOR, "{", Position(0, 0));
+	SyntaxTreeNode close_curly; close_curly.name = Token(OPERATOR, "}", Position(0, 0));
+	scope.children.push_back(open_curly);
+	scope.children.push_back(tree.children[0]); // to ignore ~prog part
+	scope.children.push_back(close_curly);
+	file_class.children.push_back(class1);
+	file_class.children.push_back(class2);
+	father.children.push_back(file_class);
+	father.children.push_back(scope);
+
+	x = father; // import statement replaced by class equivalent of file.
+}
+
+void Parser::condense_imports()
+{
+	father.traverse_left_right(&_condense_imports);
+}
+
 SyntaxTreeNode::SyntaxTreeNode(Token& n, std::vector<SyntaxTreeNode>& c, SyntaxTreeNode* f)
 	: name(n), children(c), father(f) {}
 
@@ -322,6 +376,21 @@ void SyntaxTreeNode::traverse_left_right(std::function<void(SyntaxTreeNode&)> f)
 			f(i);
 		}
 	}
+}
+
+bool SyntaxTreeNode::contains_token(Token& token)
+{
+	if (children.size() == 0) {
+		if (name.value == token.value) {
+			return true;
+		}
+	}
+	else {
+		for (SyntaxTreeNode& i : children) {
+			return i.contains_token(token);
+		}
+	}
+	return false;
 }
 
 static std::string parseToken(Token& i) {
@@ -575,9 +644,4 @@ void Parser::semantical_analysis()
 	// exit condition of a loop resolves to true or false only:
 }
 
-void Parser::validate()
-// validates the token list using predefined rules.
-{
-	syntactical_analysis();
-	semantical_analysis();
-}
+

@@ -14,6 +14,7 @@ enum class error_type {
 struct Position {
 	unsigned int line;
 	unsigned int col;
+	const char* file;
 	Position(int line, int col);
 	Position() {}
 };
