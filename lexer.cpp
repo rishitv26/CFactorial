@@ -169,7 +169,7 @@ void Lexer::condense_identifiers()
 	bool change = false;
 	for (int i = 0; i < tokens.size()-1; !change ? ++i : i+=0) {
 		change = false;
-		if (tokens[i].type == UNCLASSIFIED_TEXT && tokens[i + 1].type == INTEGER) {
+		if (tokens[i].type == UNCLASSIFIED_TEXT && tokens[i + 1].type == INTEGER && tokens[i + 1].pos.col - tokens[i].pos.col == 1) {
 			// found match, combine them:
 			Token token(UNCLASSIFIED_TEXT, tokens[i].value + tokens[i + 1].value, tokens[i].pos);
 			tokens.erase(tokens.begin() + i + 1);

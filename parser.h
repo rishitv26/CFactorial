@@ -12,17 +12,16 @@ typedef std::map<std::string, std::vector<std::string>> SemanticChecksMap;
 
 // semantical checks map.
 // contains all semantical checks to be performed on each type of reduced token.
-// TODO: add appropriae check for each keyword.
+// TODO: add appropriate check for each keyword.
 static SemanticChecksMap checks = {
-	{"~import", {}},
 	{"~using", {}},
 	{"~term", {}},
 	{"~expr", {}},
-	{"~decl", {}},
-	{"~speddecl", {}},
+	{"~decl", {"reserved_name", "no_rep", "add_to_symbols"}},
+	{"~speddecl", {"context_not_oop"}},
 	{"~var", {}},
 	{"~class", {}},
-	{"~assign", {}},
+	{"~assign", {"const_violation", "is_defined"}},
 	{"~fund", {}},
 	{"~funstart", {}},
 	{"~funcal", {}},
@@ -32,14 +31,15 @@ static SemanticChecksMap checks = {
 	{"~whilestart", {}},
 	{"~forheads2", {}},
 	{"~state", {}},
-	{"~scope", {}},
+	{"~scope", {"inc_scope"}},
+	{"~return", {}},
 };
 
 class SyntaxTreeNode {
 public:
 	Token name;
 	std::vector<SyntaxTreeNode> children;
-	SyntaxTreeNode* father = nullptr;
+	SyntaxTreeNode* father;
 
 	SyntaxTreeNode() {}
 	SyntaxTreeNode(Token& n, std::vector<SyntaxTreeNode>& c, SyntaxTreeNode* f);
@@ -49,6 +49,8 @@ public:
 	Token& get_farthest_token();
 
 	void traverse_left_right(std::function<void(SyntaxTreeNode&)> f);
+	void traverse_left_right(std::function<void(SyntaxTreeNode*)> f);
+
 	bool contains_token(Token& i);
 };
 

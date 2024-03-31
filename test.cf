@@ -1,9 +1,8 @@
 
 import test2
-import test3
 
-int x = (int)5;
-
-int main -> () {
-	return x+func();
+void main -> () {
+	const int x = 5;
+	x = 5;
+	return x;
 }

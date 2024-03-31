@@ -38,9 +38,10 @@ int main(int argc, char* argv[]) {
 	parser.syntactical_analysis();
 	// condense all import and using statements:
 	parser.condense_imports();
+	parser.semantical_analysis();
 	tree = parser.get_syntax_tree();
 
 	//// optimize tree (optimizer):
 	//// compile tree (assembler):
-	//// output executable:
+	//// output executable (.asm or .c file for now):
 }

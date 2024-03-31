@@ -124,11 +124,13 @@ static SyntaxGrammerMap GRAMMAR = {
 	{"~forhead1", {"~forheads2", "~expr", ")"}},
 	{"~forstate1", {"~forhead", "~scope"}},
 	{"~forstate2", {"~forhead", "~state"}},
+	// return statements:
+	{"~return1", {"return", "~expr", ";"}},
 	// statements:
 	{"~state1", {"~var", ";"}},
 	{"~state2", {"~assign", "~expr", ";"}},
 	{"~state3", {"~decl", ";"}},
-	{"~state4", {"return", "~expr", ";"}},
+	{"~state4", {"~return"}},
 	{"~state5", {"~expr", ";"}},
 	{"~state6", {"~ifstate"}},
 	{"~state7", {"~elstate"}},
@@ -240,6 +242,7 @@ const std::string GRAMMAR_PRECEDENCE[] = {
 	"~forhead1",
 	"~forstate1",
 	"~forstate2",
+	"~return1",
 	"~state1",
 	"~state2",
 	"~state3",
@@ -288,16 +291,16 @@ SyntaxTreeNode& Parser::get_syntax_tree()
 
 extern std::string code;
 
-static void _condense_imports(SyntaxTreeNode& x) {
-	if (x.name.value != "~import") return;
-	const std::string& raw_filename = x.children.back().get_closest_token().value;
+static void _condense_imports(SyntaxTreeNode* x) {
+	if (x->name.value != "~import") return;
+	const std::string& raw_filename = x->children.back().get_closest_token().value;
 	const std::string filename_string = raw_filename + ".cf";
 	const char* filename = filename_string.c_str();
 
 	std::ifstream file(filename);
 	if (!file.is_open()) {
 		const std::string message = "File \"" + filename_string + "\" not found.";
-		ERROR(error_type::IMPORTED_FILE_NOT_FOUND, message.c_str(), x.children.back().get_closest_token().pos, filename, code);
+		ERROR(error_type::IMPORTED_FILE_NOT_FOUND, message.c_str(), x->children.back().get_closest_token().pos, filename, code);
 	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();
@@ -313,22 +316,40 @@ static void _condense_imports(SyntaxTreeNode& x) {
 	parser.syntactical_analysis();
 	// condense all import and using statements:
 	parser.condense_imports();
-	SyntaxTreeNode tree = parser.get_syntax_tree();
+	SyntaxTreeNode& tree = parser.get_syntax_tree();
 	// proccess tree further:
-	SyntaxTreeNode father; father.name = Token(REDUCED, "~class", Position(0, 0));
-	SyntaxTreeNode file_class; file_class.name = Token(REDUCED, "~decl", Position(0, 0));
-	SyntaxTreeNode class1; class1.name = Token(KEYWORD, "class", Position(0, 0));
-	SyntaxTreeNode class2; class2.name = Token(KEYWORD, raw_filename, Position(0, 0));
-	SyntaxTreeNode scope; scope.name = Token(REDUCED, "~scope", Position(0, 0));
-	SyntaxTreeNode open_curly; open_curly.name = Token(OPERATOR, "{", Position(0, 0));
-	SyntaxTreeNode close_curly; close_curly.name = Token(OPERATOR, "}", Position(0, 0));
-	scope.children.push_back(open_curly);
-	scope.children.push_back(tree.children[0]); // to ignore ~prog part
-	scope.children.push_back(close_curly);
-	file_class.children.push_back(class1);
-	file_class.children.push_back(class2);
-	father.children.push_back(file_class);
-	father.children.push_back(scope);
+
+	SyntaxTreeNode f;
+	SyntaxTreeNode fc;
+	SyntaxTreeNode c1;
+	SyntaxTreeNode c2;
+	SyntaxTreeNode s;
+	SyntaxTreeNode oc;
+	SyntaxTreeNode cc;
+
+	SyntaxTreeNode* father = &f; father->name = Token(REDUCED, "~class", Position(0, 0));
+	SyntaxTreeNode* file_class = &fc; file_class->name = Token(REDUCED, "~decl", Position(0, 0));
+	SyntaxTreeNode* class1 = &c1; class1->name = Token(KEYWORD, "class", Position(0, 0));
+	SyntaxTreeNode* class2 = &c2; class2->name = Token(IDENTIFIER, raw_filename, Position(0, 0));
+	SyntaxTreeNode* scope = &s; scope->name = Token(REDUCED, "~scope", Position(0, 0));
+	SyntaxTreeNode* open_curly = &oc; open_curly->name = Token(OPERATOR, "{", Position(0, 0));
+	SyntaxTreeNode* close_curly = &cc; close_curly->name = Token(OPERATOR, "}", Position(0, 0));
+
+	scope->children.push_back(*open_curly); 
+	scope->children.push_back(tree.children[0]);
+	scope->children.push_back(*close_curly);
+	file_class->children.push_back(*class1);
+	file_class->children.push_back(*class2);
+	father->children.push_back(*file_class);
+	father->children.push_back(*scope);
+
+	open_curly->father = &father->children.back();
+	close_curly->father = &father->children.back();
+	tree.children[0].father = &father->children.back();
+	class1->father = &father->children.front();
+	class2->father = &father->children.front();
+	file_class->father = x;
+	scope->father = x;
 
 	x = father; // import statement replaced by class equivalent of file.
 }
@@ -374,6 +395,17 @@ void SyntaxTreeNode::traverse_left_right(std::function<void(SyntaxTreeNode&)> f)
 		for (SyntaxTreeNode& i : children) {
 			if (i.children.size() != 0) i.traverse_left_right(f);
 			f(i);
+		}
+	}
+}
+
+void SyntaxTreeNode::traverse_left_right(std::function<void(SyntaxTreeNode*)> f)
+{
+	if (children.size() == 0) return;
+	else {
+		for (SyntaxTreeNode& i : children) {
+			if (i.children.size() != 0) i.traverse_left_right(f);
+			f(&i);
 		}
 	}
 }
@@ -508,12 +540,10 @@ static bool reduce(Stack<Token>& stack, Parser& parse)
 				s.erase(s.begin() + s.size() - 1);
 				Token replacement(REDUCED, s, stack.cvect()[stack.cvect().size() - i - 1].pos);
 				replace(stack.cvect(), GRAMMAR[first], replacement, parse);
-				stack.print();
 				return true; // ONLY DO 1 SIMPLIFICATION AT A TIME!
 			}
 		}
 	}
-	stack.print();
 	return false;
 }
 
@@ -598,7 +628,6 @@ void Parser::syntactical_analysis()
 		SyntaxTreeNode s;
 		s.name = token;
 		current_layer.push_back(s);
-		stack.print();
 		if (token.value != ";") continue;
 		if (is_reducable(stack)) do {
 			reduce(stack, *this);
@@ -608,7 +637,6 @@ void Parser::syntactical_analysis()
 	// reduce extra if neccessary...
 	if (is_reducable(stack)) while (is_reducable(stack)) reduce(stack, *this);
 	final_check(stack, *this); // checks are different in the end.
-	stack.print();
 }
 
 Stack<int> scopes;
@@ -632,16 +660,6 @@ void Parser::semantical_analysis()
 			semantic_checks.at(i)(x);
 		}
 	});
-	// check undeclared variables:
-	// multiple declarations in the same scope:
-	// misuse of reserved identifiers:
-	// attempting to access variable out of scope:
-	// type mismatches:
-	// parameter type mismatch when calling functions:
-	// function return value match the return type:
-	// arithemetic operators operate on numeric types or have defined behaviour:
-	// condition of if statement resolves to true or false only:
-	// exit condition of a loop resolves to true or false only:
 }
 
 

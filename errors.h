@@ -17,6 +17,8 @@ struct Position {
 	const char* file;
 	Position(int line, int col);
 	Position() {}
+
+	bool operator==(Position);
 };
 
 void ERROR(error_type t, 
