@@ -9,6 +9,7 @@ enum class error_type {
 	NOT_IN_GLOBAL_SCOPE = 391,
 	TOKEN_NOT_DEFINED = 392,
 	REPEATED_DEFINITION = 393,
+	BAD_TOKEN_USE = 394,
 };
 
 struct Position {

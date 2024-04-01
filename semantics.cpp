@@ -173,3 +173,13 @@ void not_function_context(SyntaxTreeNode& node)
 {
 }
 
+void bad_use_of_tokens(SyntaxTreeNode& node)
+{
+    if (node.name.value != "~speddecl") return;
+    node.traverse_left_right([](SyntaxTreeNode& x) {
+        if (x.name.value == "~speddecl") {
+            const std::string message = "Special initialization is used badly.";
+            ERROR(error_type::REPEATED_DEFINITION, message.c_str(), x.children[0].name.pos, FILE_NAME, code);
+        }
+    });
+}

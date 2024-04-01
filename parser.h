@@ -18,7 +18,7 @@ static SemanticChecksMap checks = {
 	{"~term", {}},
 	{"~expr", {}},
 	{"~decl", {"reserved_name", "no_rep", "add_to_symbols"}},
-	{"~speddecl", {"context_not_oop"}},
+	{"~speddecl", {"context_not_oop", "bad_use_of_tokens"}},
 	{"~var", {}},
 	{"~class", {}},
 	{"~assign", {"const_violation", "is_defined"}},
