@@ -122,11 +122,11 @@ void reserved_name(SyntaxTreeNode& node)
         for (Symbol& i : symbols) {
             if (x.name.value == "super") {
                 const std::string message = "Token \"" + x.name.value + "\" is a reserved identifier";
-                ERROR(error_type::REPEATED_DEFINITION, message.c_str(), x.name.pos, FILE_NAME, code);
+                ERROR(error_type::RESERVED_NAME, message.c_str(), x.name.pos, FILE_NAME, code);
             }
             if (x.name.value == "this") {
                 const std::string message = "Token \"" + x.name.value + "\" is a reserved identifier";
-                ERROR(error_type::REPEATED_DEFINITION, message.c_str(), x.name.pos, FILE_NAME, code);
+                ERROR(error_type::RESERVED_NAME, message.c_str(), x.name.pos, FILE_NAME, code);
             }
         }
     });
@@ -134,6 +134,10 @@ void reserved_name(SyntaxTreeNode& node)
 
 void context_not_oop(SyntaxTreeNode& node)
 {
+    if (context != "oop") {
+        const std::string message = "Token used in a non-OOP context.";
+        ERROR(error_type::INVALID_CONTEXT, message.c_str(), node.name.pos, FILE_NAME, code);
+    }
 }
 
 void correct_decl_type(SyntaxTreeNode& node)

@@ -18,7 +18,7 @@ static SemanticChecksMap checks = {
 	{"~term", {}},
 	{"~expr", {}},
 	{"~decl", {"reserved_name", "no_rep", "add_to_symbols"}},
-	{"~speddecl", {"context_not_oop", "bad_use_of_tokens"}},
+	{"~speddecl", {"bad_use_of_tokens"}},
 	{"~var", {}},
 	{"~class", {"update_context"}},
 	{"~assign", {"const_violation", "is_defined"}},
@@ -33,6 +33,7 @@ static SemanticChecksMap checks = {
 	{"~state", {}},
 	{"~scope", {"inc_scope"}},
 	{"~return", {}},
+	{"~oopspeddecl", {"context_not_oop"}},
 	{"}", {"update_context"}},
 };
 
