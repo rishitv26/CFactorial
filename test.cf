@@ -2,7 +2,7 @@
 import test2
 
 void main -> () {
-	const const int x = 5;
+	const int x = 5;
 	x = 5;
 	return x;
 }

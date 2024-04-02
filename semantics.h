@@ -41,6 +41,7 @@ void expr_not_bool(SyntaxTreeNode& node);
 void not_bool_context(SyntaxTreeNode& node);
 void not_function_context(SyntaxTreeNode& node);
 void bad_use_of_tokens(SyntaxTreeNode& node);
+void update_context(SyntaxTreeNode& node);
 
 static const SemanticChecks semantic_checks = {
 	{"valid_file", &valid_file},
@@ -60,6 +61,7 @@ static const SemanticChecks semantic_checks = {
 	{"not_bool_context", &not_bool_context},
 	{"not_function_context", &not_function_context},
 	{"bad_use_of_tokens", &bad_use_of_tokens},
+	{"update_context", &update_context},
 };
 
 #endif // SEMANTICS_CF_H

@@ -183,3 +183,14 @@ void bad_use_of_tokens(SyntaxTreeNode& node)
         }
     });
 }
+
+void update_context(SyntaxTreeNode& node)
+{
+    if (node.name.value == "~class") context = "oop";
+    else if (node.name.value == "~fundef") context = "function";
+    else if (node.name.value == "~ifhead" ||
+        node.name.value == "~whilehead" ||
+        node.name.value == "~forhead2"
+        ) context = "boolean";
+    else context = "";
+}

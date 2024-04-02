@@ -44,14 +44,15 @@ static SyntaxGrammerMap GRAMMAR = {
 	{"~speddecl1", {"const", "~decl"}},
 	{"~speddecl2", {"inline", "~decl"}},
 	{"~speddecl3", {"infile", "~decl"}},
-	{"~speddecl4", {"public", "~decl"}},
-	{"~speddecl5", {"public", "static", "~decl"}},
-	{"~speddecl6", {"private", "~decl"}},
-	{"~speddecl7", {"private", "static", "~decl"}},
-	{"~speddecl8", {"protected", "~decl"}},
-	{"~speddecl9", {"protected", "static", "~decl"}},
+	{"~oopspeddecl1", {"public", "~speddecl"}},
+	{"~oopspeddecl2", {"public", "static", "~speddecl"}},
+	{"~oopspeddecl3", {"private", "~speddecl"}},
+	{"~oopspeddecl4", {"private", "static", "~speddecl"}},
+	{"~oopspeddecl5", {"protected", "~speddecl"}},
+	{"~oopspeddecl6", {"protected", "static", "~speddecl"}},
 	// more variables:
 	{"~decl4", {"~speddecl"}},
+	{"~decl4", {"~oopspeddecl"}},
 	{"~decl5", {"~decl", "[", "]"}},
 	{"~decl6", {"/TYPE", "#", "/ID"}},
 	{"~decl7", {"/ID", "#", "/ID"}},
@@ -175,12 +176,12 @@ const std::string GRAMMAR_PRECEDENCE[] = {
 	"~speddecl1",
 	"~speddecl2",
 	"~speddecl3",
-	"~speddecl4",
-	"~speddecl5",
-	"~speddecl6",
-	"~speddecl7",
-	"~speddecl8",
-	"~speddecl9",
+	"~oopspeddecl1",
+	"~oopspeddecl2",
+	"~oopspeddecl3",
+	"~oopspeddecl4",
+	"~oopspeddecl5",
+	"~oopspeddecl6",
 	"~decl4",
 	"~decl5",
 	"~decl6",
@@ -390,23 +391,25 @@ Token& SyntaxTreeNode::get_farthest_token()
 
 void SyntaxTreeNode::traverse_left_right(std::function<void(SyntaxTreeNode&)> f)
 {
-	if (children.size() == 0) return;
+	if (children.size() == 0 && name.value != "}") return;
 	else {
 		for (SyntaxTreeNode& i : children) {
 			if (i.children.size() != 0) i.traverse_left_right(f);
 			f(i);
 		}
+		if (name.value == "}") f(*this);
 	}
 }
 
 void SyntaxTreeNode::traverse_left_right(std::function<void(SyntaxTreeNode*)> f)
 {
-	if (children.size() == 0) return;
+	if (children.size() == 0 && name.value != "}") return;
 	else {
 		for (SyntaxTreeNode& i : children) {
 			if (i.children.size() != 0) i.traverse_left_right(f);
 			f(&i);
 		}
+		if (name.value == "}") f(this);
 	}
 }
 
