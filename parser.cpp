@@ -50,12 +50,18 @@ static SyntaxGrammerMap GRAMMAR = {
 	{"~oopspeddecl4", {"private", "static", "~speddecl"}},
 	{"~oopspeddecl5", {"protected", "~speddecl"}},
 	{"~oopspeddecl6", {"protected", "static", "~speddecl"}},
+	{"~oopspeddecl7", {"public", "~decl"}},
+	{"~oopspeddecl8", {"public", "static", "~decl"}},
+	{"~oopspeddecl9", {"private", "~decl"}},
+	{"~oopspeddeclA", {"private", "static", "~decl"}},
+	{"~oopspeddeclB", {"protected", "~decl"}},
+	{"~oopspeddeclC", {"protected", "static", "~decl"}},
 	// more variables:
 	{"~decl4", {"~speddecl"}},
-	{"~decl4", {"~oopspeddecl"}},
-	{"~decl5", {"~decl", "[", "]"}},
-	{"~decl6", {"/TYPE", "#", "/ID"}},
-	{"~decl7", {"/ID", "#", "/ID"}},
+	{"~decl5", {"~oopspeddecl"}},
+	{"~decl6", {"~decl", "[", "]"}},
+	{"~decl7", {"/TYPE", "#", "/ID"}},
+	{"~decl8", {"/ID", "#", "/ID"}},
 	{"~var1", {"~decl", "=", "~expr"}},
 	// class:
 	{"~class1", {"~decl", "~scope"}},
@@ -182,10 +188,17 @@ const std::string GRAMMAR_PRECEDENCE[] = {
 	"~oopspeddecl4",
 	"~oopspeddecl5",
 	"~oopspeddecl6",
+	"~oopspeddecl7",
+	"~oopspeddecl8",
+	"~oopspeddecl9",
+	"~oopspeddeclA",
+	"~oopspeddeclB",
+	"~oopspeddeclC",
 	"~decl4",
 	"~decl5",
 	"~decl6",
 	"~decl7",
+	"~decl8",
 	"~var1",
 	"~class1",
 	"~assign1",
@@ -315,7 +328,7 @@ static void _condense_imports(SyntaxTreeNode* x) {
 
 	Parser parser(tokens, insert_code, filename);
 	parser.syntactical_analysis();
-	// condense all import and using statements:
+	// condense all import statements:
 	parser.condense_imports();
 	SyntaxTreeNode& tree = parser.get_syntax_tree();
 	// proccess tree further:
@@ -349,10 +362,13 @@ static void _condense_imports(SyntaxTreeNode* x) {
 	tree.children[0].father = &father->children.back();
 	class1->father = &father->children.front();
 	class2->father = &father->children.front();
-	file_class->father = x;
-	scope->father = x;
+	file_class->father = father;
+	scope->father = father;
+	father->father = &tree;
 
-	x = father; // import statement replaced by class equivalent of file.
+	SyntaxTreeNode output = *father;
+	// ERROR! Since file_class and scope's parents are magically set to null, which should not happen.
+	*x = output; // import statement replaced by class equivalent of file.
 }
 
 void Parser::condense_imports()
@@ -391,13 +407,14 @@ Token& SyntaxTreeNode::get_farthest_token()
 
 void SyntaxTreeNode::traverse_left_right(std::function<void(SyntaxTreeNode&)> f)
 {
-	if (children.size() == 0 && name.value != "}") return;
+	if (children.size() == 0 && name.value != "}") {
+		f(*this);
+	}
 	else {
 		for (SyntaxTreeNode& i : children) {
 			if (i.children.size() != 0) i.traverse_left_right(f);
 			f(i);
 		}
-		if (name.value == "}") f(*this);
 	}
 }
 
@@ -636,6 +653,7 @@ void Parser::syntactical_analysis()
 			reduce(stack, *this);
 		} while (is_reducable(stack));
 		check_errors(stack, *this);
+		
 	}
 	// reduce extra if neccessary...
 	if (is_reducable(stack)) while (is_reducable(stack)) reduce(stack, *this);
@@ -658,6 +676,7 @@ void Parser::semantical_analysis()
 	father.traverse_left_right(&assign_scopes);
 	// do semantical checks:
 	father.traverse_left_right([](SyntaxTreeNode& x) {
+		cout << x.name.value << endl;
 		if (x.name.type != REDUCED) return;
 		for (const std::string& i : checks[x.name.value]) {
 			semantic_checks.at(i)(x);

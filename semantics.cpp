@@ -63,8 +63,6 @@ void inc_scope(SyntaxTreeNode& node)
 void no_rep(SyntaxTreeNode& node)
 {
     node.traverse_left_right([](SyntaxTreeNode& x) {
-        print_symbols();
-        cout << " at " << x.name.value << endl;
         if (x.name.type != IDENTIFIER) return; // dont check since its not an identifier
         for (Symbol& i : symbols) {
             if (x.name.pos == i.name.pos) return; // already checked, dont check again
@@ -175,6 +173,10 @@ void not_bool_context(SyntaxTreeNode& node)
 
 void not_function_context(SyntaxTreeNode& node)
 {
+    if (context != "function") {
+        const std::string message = "Token used in a non-functional context.";
+        ERROR(error_type::INVALID_CONTEXT, message.c_str(), node.name.pos, FILE_NAME, code);
+    }
 }
 
 void bad_use_of_tokens(SyntaxTreeNode& node)
@@ -191,7 +193,8 @@ void bad_use_of_tokens(SyntaxTreeNode& node)
 void update_context(SyntaxTreeNode& node)
 {
     if (node.name.value == "~class") context = "oop";
-    else if (node.name.value == "~fundef") context = "function";
+    else if (node.name.value == "~fund") context = "function";
+    else if (node.name.value == "~funstart") context = "function";
     else if (node.name.value == "~ifhead" ||
         node.name.value == "~whilehead" ||
         node.name.value == "~forhead2"

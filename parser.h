@@ -22,8 +22,7 @@ static SemanticChecksMap checks = {
 	{"~var", {}},
 	{"~class", {"update_context"}},
 	{"~assign", {"const_violation", "is_defined"}},
-	{"~fundef", {"update_context"}},
-	{"~funstart", {}},
+	{"~fund", {"update_context"}},
 	{"~funcal", {}},
 	{"~fact", {}},
 	{"~ifhead", {"update_context"}},
@@ -32,7 +31,7 @@ static SemanticChecksMap checks = {
 	{"~forheads2", {"update_context"}},
 	{"~state", {}},
 	{"~scope", {"inc_scope"}},
-	{"~return", {}},
+	{"~return", {"not_function_context"}},
 	{"~oopspeddecl", {"context_not_oop"}},
 	{"}", {"update_context"}},
 };
