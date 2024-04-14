@@ -11,7 +11,8 @@ enum class error_type {
 	REPEATED_DEFINITION = 393,
 	BAD_TOKEN_USE = 394,
 	RESERVED_NAME = 395,
-	INVALID_CONTEXT = 395,
+	INVALID_CONTEXT = 396,
+	CONST_VIOLATION = 397,
 };
 
 struct Position {

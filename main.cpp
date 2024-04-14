@@ -36,8 +36,6 @@ int main(int argc, char* argv[]) {
 	//// validate & generate syntax trees (parser):
 	Parser parser(tokens, code, FILE_NAME);
 	parser.syntactical_analysis();
-	// condense all import and using statements:
-	parser.condense_imports();
 	parser.semantical_analysis();
 	tree = parser.get_syntax_tree();
 

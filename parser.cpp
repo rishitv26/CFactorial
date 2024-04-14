@@ -43,7 +43,7 @@ static SyntaxGrammerMap GRAMMAR = {
 	// special declarations:
 	{"~speddecl1", {"const", "~decl"}},
 	{"~speddecl2", {"inline", "~decl"}},
-	{"~speddecl3", {"infile", "~decl"}},
+	{"~speddecl3", {"unsafe", "~decl"}},
 	{"~oopspeddecl1", {"public", "~speddecl"}},
 	{"~oopspeddecl2", {"public", "static", "~speddecl"}},
 	{"~oopspeddecl3", {"private", "~speddecl"}},
@@ -333,13 +333,13 @@ static void _condense_imports(SyntaxTreeNode* x) {
 	SyntaxTreeNode& tree = parser.get_syntax_tree();
 	// proccess tree further:
 
-	SyntaxTreeNode f;
-	SyntaxTreeNode fc;
-	SyntaxTreeNode c1;
-	SyntaxTreeNode c2;
-	SyntaxTreeNode s;
-	SyntaxTreeNode oc;
-	SyntaxTreeNode cc;
+	SyntaxTreeNode f = SyntaxTreeNode();
+	SyntaxTreeNode fc = SyntaxTreeNode();
+	SyntaxTreeNode c1 = SyntaxTreeNode();
+	SyntaxTreeNode c2 = SyntaxTreeNode();
+	SyntaxTreeNode s = SyntaxTreeNode();
+	SyntaxTreeNode oc = SyntaxTreeNode();
+	SyntaxTreeNode cc = SyntaxTreeNode();
 
 	SyntaxTreeNode* father = &f; father->name = Token(REDUCED, "~class", Position(0, 0));
 	SyntaxTreeNode* file_class = &fc; file_class->name = Token(REDUCED, "~decl", Position(0, 0));
@@ -371,6 +371,7 @@ static void _condense_imports(SyntaxTreeNode* x) {
 	*x = output; // import statement replaced by class equivalent of file.
 }
 
+// WARNING: Deprecated
 void Parser::condense_imports()
 {
 	father.traverse_left_right(&_condense_imports);
@@ -658,6 +659,14 @@ void Parser::syntactical_analysis()
 	// reduce extra if neccessary...
 	if (is_reducable(stack)) while (is_reducable(stack)) reduce(stack, *this);
 	final_check(stack, *this); // checks are different in the end.
+
+	// assign fathers:
+	father.traverse_left_right([&](SyntaxTreeNode& i) {
+		if (i.children.size() == 0) return;
+		for (SyntaxTreeNode& j : i.children) {
+			j.father = &i;
+		}
+	});
 }
 
 Stack<int> scopes;
@@ -676,7 +685,6 @@ void Parser::semantical_analysis()
 	father.traverse_left_right(&assign_scopes);
 	// do semantical checks:
 	father.traverse_left_right([](SyntaxTreeNode& x) {
-		cout << x.name.value << endl;
 		if (x.name.type != REDUCED) return;
 		for (const std::string& i : checks[x.name.value]) {
 			semantic_checks.at(i)(x);

@@ -29,7 +29,7 @@ const std::string KEYWORDS[] = {
 	"protected",
 	"const",
 	"inline",
-	"infile",
+	"unsafe",
 	"static",
 };
 /*

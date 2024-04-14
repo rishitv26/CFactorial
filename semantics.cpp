@@ -90,19 +90,6 @@ void add_to_symbols(SyntaxTreeNode& node)
     s.scope = scopes.access();
 
     symbols.push_back(s);
-
-    if (node.name.value == "~using") {
-        // do it again since /ID must also be defined.
-        store = node.children.back().name;
-        s.name = store;
-        s.is_const = (node.father->get_closest_token().value == "const") ? true : false;
-        s.is_file = (node.father->name.value == "~import") ? true : false;
-        s.is_initialized = (node.father->name.value == "~assign" || node.father->name.value == "~var"
-                            || node.father->name.value == "~fund" || node.father->name.value == "~class") ? true : false;
-        s.scope = scopes.access();
-
-        symbols.push_back(s);
-    }
 }
 
 void valid_math(SyntaxTreeNode& node)
@@ -144,19 +131,15 @@ void correct_decl_type(SyntaxTreeNode& node)
 
 void const_violation(SyntaxTreeNode& node)
 {
-    //node.traverse_left_right([](SyntaxTreeNode& x) {
-    //    if (x.name.type != IDENTIFIER) return; // dont check since its not an identifier
-    //    for (Symbol& i : symbols) {
-    //        if (x.name.value == "super") {
-    //            const std::string message = "Token \"" + x.name.value + "\" is a reserved identifier";
-    //            ERROR(error_type::REPEATED_DEFINITION, message.c_str(), x.name.pos, FILE_NAME, code);
-    //        }
-    //        if (x.name.value == "this") {
-    //            const std::string message = "Token \"" + x.name.value + "\" is a reserved identifier";
-    //            ERROR(error_type::REPEATED_DEFINITION, message.c_str(), x.name.pos, FILE_NAME, code);
-    //        }
-    //    }
-    //    });
+    // only checking with assignments:
+    if (node.name.value != "~assign") return;
+    for (Symbol& i : symbols) {
+        if (i.name.value == node.children[0].name.value && i.is_const) {
+            // throw error:
+            const std::string message = "Attempting to change token \"" + i.name.value + "\", which is a constant.";
+            ERROR(error_type::CONST_VIOLATION, message.c_str(), node.name.pos, FILE_NAME, code);
+        }
+    }
 }
 
 void correct_params(SyntaxTreeNode& node)
