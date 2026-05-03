@@ -1,5 +1,5 @@
 
 void please_work -> (int param1) {
-	printf("ching chong malai chong");
+	printf("lets just say that life is great");
 }
 
